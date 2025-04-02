@@ -1,34 +1,53 @@
 import firebase_admin
-from firebase_admin import credentials, firestore
-from datetime import datetime
+from firebase_admin import credentials, firestore, auth
+import os
 
-# Initialize Firebase
-cred = credentials.Certificate("C:/Users/Anju/Downloads/attendence-list-lbs-firebase-adminsdk-fbsvc-c93787b982.json")
-firebase_admin.initialize_app(cred)
+# Load Firebase JSON Key Securely
+FIREBASE_JSON = os.getenv("FIREBASE_JSON", "attendence-list-lbs-firebase-adminsdk-fbsvc-ae262f0826.json")
 
-# Initialize Firestore
+# Initialize Firebase only if not already initialized
+def initialize_firebase():
+    if not firebase_admin._apps:
+        try:
+            cred = credentials.Certificate(FIREBASE_JSON)
+            firebase_admin.initialize_app(cred)
+            print("✅ Firebase initialized successfully!")
+        except Exception as e:
+            print(f"❌ Error initializing Firebase: {e}")
+            exit(1)  # Exit if Firebase fails to initialize
+    else:
+        print("⚠️ Firebase already initialized.")
+    
+initialize_firebase()
+
+# Firestore Database and Auth
 db = firestore.client()
+auth = firebase_admin.auth
 
-def log_attendance_firebase(name):
+# Function to Log Attendance in Firebase
+def log_attendance_firebase(name, teacher_email):
+    from datetime import datetime
+
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    attendance_data = {"name": name, "timestamp": timestamp}
-    attendance_ref = db.collection('attendance')
-    attendance_ref.add(attendance_data)
-    print(f"Attendance logged for {name} at {timestamp}")
 
-def fetch_and_generate_csv():
-    attendance_ref = db.collection('attendance')
-    docs = attendance_ref.stream()
-    attendance_data = [["Name", "Timestamp"]]
-    for doc in docs:
-        data = doc.to_dict()
-        name = data.get("name")
-        timestamp = data.get("timestamp")
-        attendance_data.append([name, timestamp])
+    try:
+        db.collection('attendance').add({
+            "name": name,
+            "timestamp": timestamp,
+            "teacher_email": teacher_email
+        })
+        print(f"✅ Attendance logged for {name} at {timestamp}")
+    except Exception as e:
+        print(f"❌ Error logging attendance: {e}")
 
-    with open('attendance.csv', mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerows(attendance_data)
-    print("Attendance CSV generated.")
-
-
+# Function to Register a New Student
+def register_student(name, student_id, email, image_path):
+    try:
+        db.collection("students").document(student_id).set({
+            "name": name,
+            "email": email,
+            "image_path": image_path
+        })
+        print(f"✅ Student {name} registered successfully!")
+    except Exception as e:
+        print(f"❌ Error registering student {name}: {e}")

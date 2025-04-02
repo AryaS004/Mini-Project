@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Profile Image</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        #camera, #capture-btn {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Upload Profile Image</h2>
+
+        <!-- Display any flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert alert-{{ messages[0][0] }}">
+                    {{ messages[0][1] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="profile_image">Choose Profile Image</label>
+                <input type="file" class="form-control" name="profile_image" id="profile_image" accept="image/*">
+            </div>
+
+            <div class="form-group" id="camera">
+                <label for="captureImages" class="form-label">Capture Image for Face Recognition</label>
+                <video id="video" width="320" height="240" autoplay></video>
+                <button type="button" id="capture-btn" class="btn btn-primary mt-2">Capture Image</button>
+                <canvas id="canvas" style="display: none;"></canvas>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Upload</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('student_dashboard') }}" class="btn btn-link">Go to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let captureBtn = document.getElementById('capture-btn');
+            let video = document.getElementById('video');
+            let canvas = document.getElementById('canvas');
+            let context = canvas.getContext('2d');
+            let cameraDiv = document.getElementById('camera');
+            
+            // Start the webcam when the page loads
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                    video.play();
+                    cameraDiv.style.display = 'block';  // Show the camera
+                }).catch(function(err) {
+                    alert("Camera error: " + err);
+                });
+
+            // Capture the image when the button is clicked
+            captureBtn.addEventListener('click', function() {
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                // Send the captured image to the server
+                let imageData = canvas.toDataURL('image/png');
+                uploadImage(imageData);
+            });
+
+            // Function to upload captured image to the server
+            function uploadImage(imageData) {
+                fetch("{{ url_for('upload_profile') }}", {
+                    method: 'POST',
+                    body: JSON.stringify({ image: imageData }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => response.json())
+                  .then(data => {
+                      console.log('Image uploaded:', data);
+                  }).catch(error => {
+                      console.error('Error uploading image:', error);
+                  });
+            }
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

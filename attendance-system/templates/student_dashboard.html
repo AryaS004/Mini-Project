@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}Student Dashboard{% endblock %}
+{% block header %}Student Dashboard{% endblock %}
+
+{% block content %}
+    {% if session.get('user') %}
+        <h2>Welcome, {{ session['user'].get('name', 'Student') }}</h2>
+
+        <!-- Profile Image -->
+        {% set profile_image = session['user'].get('profile_image', 'default-profile.png') %}
+        <img src="{{ url_for('static', filename='uploads/' + profile_image) }}" 
+             alt="Profile Image" class="rounded-circle" width="100" height="100">
+
+        <!-- Dashboard Cards -->
+        <div class="row mt-4">
+            <!-- ✅ Attendance Card -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">View Attendance</div>
+                    <div class="card-body">
+                        <p>Check your attendance records for the classes you have attended.</p>
+                        <a href="{{ url_for('view_attendance') }}" class="btn btn-success">View Attendance</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ✅ Logout Card -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">Logout</div>
+                    <div class="card-body">
+                        <p>Sign out of your account securely.</p>
+                        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="alert alert-danger">You are not logged in. <a href="{{ url_for('login') }}">Login here</a>.</div>
+    {% endif %}
+{% endblock %}
