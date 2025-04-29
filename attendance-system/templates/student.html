@@ -1,0 +1,162 @@
+<html>
+    <head>
+        <title> 
+            student working
+        </title>
+        <link rel="stylesheet" href="static/css/student.css">
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+        <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+        
+        <script>
+            const firebaseConfig = {
+              apiKey: "AIzaSyAhvUQC6SWtZ8aFMpRu0owWT1MVcq_t_Fo",
+              authDomain: "attendence-list-lbs.firebaseapp.com",
+              databaseURL: "https://attendence-list-lbs-default-rtdb.firebaseio.com",
+              projectId: "attendence-list-lbs",
+              storageBucket: "attendence-list-lbs.firebasestorage.app",
+              messagingSenderId: "874744289039",
+              appId: "1:874744289039:web:67d16e57a1c4ca0a48107a"
+            };
+          
+            const app = firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+          
+            // Wait for DOM to be ready
+            window.onload = () => {
+              const logoutBtn = document.getElementById("logout-btn");
+              if (logoutBtn) {
+                logoutBtn.addEventListener("click", function (e) {
+                  e.preventDefault();
+                  auth.signOut().then(() => {
+                    window.location.href = "/studentlogin";
+                  }).catch((error) => {
+                    console.error("Error during logout:", error);
+                  });
+                });
+              }
+            };
+          </script>
+          
+        
+    </head>
+    <body >
+        <nav class="sidebar close">
+            <header>
+                <div class="image-text">
+                    <span class="image">
+                        <img src="static/images/logo.jpg" alt="logo">
+                    </span>
+                    <div class="text-header-text">
+                        <span class="name">Welcome</span>
+                        <span class="profession">Student Page</span>
+                    </div>
+
+                </div>
+                <i class='bx bx-chevron-right toggle'></i>
+            </header>
+            <div class="menu-bar">
+                <div class="menu">
+                    <ul class="menu-links">
+                        <li class="nav-links">
+                            <a href="#">
+                                <i class='bx bx-user icon'></i>
+                                <span class="text nav-text">Profile</span>
+                            </a>
+                        </li>
+                           
+                            
+                                <li class="nav-links">
+                                    <a href="#" id="attendance-btn">
+                                        <i class='bx bx-home-alt icon'></i>
+                                        <span class="text nav-text">Attendance</span>
+                                        <!-- Dropdown arrow -->
+                                    </a>
+                                </li>
+                            
+                            
+                            <!-- Submenu placed at the bottom -->
+                            <ul class="bottom-submenu" id="attendance-submenu">
+                                <li>
+                                    <a href="#">
+                                        <i class='bx bx-list-ul icon'></i>
+                                        <span class="text nav-text">Daily Attendance</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="/attendanceview">
+                                        <i class='bx bx-book icon'></i>
+                                        <span class="text nav-text">Subject Attendance</span>
+                                    </a>
+                                </li>
+                            </ul>
+                            
+                            
+                            
+                            
+
+
+
+                        <li class="nav-links">
+                            <a href="#">
+                                <i class='bx bx-bell icon'></i>
+                                <span class="text nav-text">Notification</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bottom-content">
+                    <li class="">
+                        <a href="/studentlogin" id="logout-btn">
+                            <i class="bx bx-log-out icon"></i>
+                            <span class="text nav-text">Logout</span>
+                          </a>
+                          
+                    </li>
+
+                    <li class="mode">
+                        <div class="moon-sun">
+                            <i class="bx bx-moon icon moon"></i>
+                            <i class="bx bx-sun icon sun"></i>
+                        </div>
+                        <span class="mode-text text">Dark Mode</span>
+                        <div class="toggle-switch">
+                            <span class="switch"></span>
+                        </div>
+                    </li>
+                </div>
+            </div>
+        </nav>
+
+
+
+        <main class="main-content">
+            <!-- Welcome Section -->
+            <div class="welcome">
+                <h1 id="greeting">Welcome, Student!</h1>
+                <div id="date-time"></div>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="dashboard-cards">
+                <div class="card" id="class-schedule">
+                    <h3>Today's Schedule</h3>
+                    <ul id="schedule-list"></ul>
+                </div>
+                <div class="card">
+                    <h3>Attendance Overview</h3>
+                    <div id="attendance-progress">
+                        <span id="attendance-percentage">75%</span>
+                    </div>
+                </div>
+                <div class="card" id="assignments">
+                    <h3>Upcoming Assignments</h3>
+                    <ul id="assignments-list"></ul>
+                </div>
+            </div>
+        </main>
+        </main>
+<script src="static/js/script.js"></script>
+
+    </body>
+</html>

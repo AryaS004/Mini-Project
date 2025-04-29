@@ -33,7 +33,6 @@ def load_dataset():
             img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
             if img is not None:
-                # ✅ Use detected size from the first image
                 if len(faces) == 0:
                     img_height, img_width = img.shape
                 img_resized = cv2.resize(img, (img_width, img_height))  # ✅ Resize dynamically
@@ -54,47 +53,53 @@ def load_dataset():
 
     return np.array(faces, dtype=np.uint8), np.array(labels, dtype=np.int32), label_map
 
-# ✅ Load dataset
-print("📂 Loading dataset...")
-try:
-    faces, labels, label_map = load_dataset()
-    print(f"✅ Dataset loaded: {len(faces)} images, {len(np.unique(labels))} classes.")
-except ValueError as e:
-    print(str(e))
-    exit(1)
+def train_model():
+    """Train the FisherFace recognizer and save the model."""
+    print("📂 Loading dataset...")
+    try:
+        faces, labels, label_map = load_dataset()
+        print(f"✅ Dataset loaded: {len(faces)} images, {len(np.unique(labels))} classes.")
+    except ValueError as e:
+        print(str(e))
+        return False
 
-# ✅ Train/Test Split (80% Train, 20% Test)
-X_train, X_test, y_train, y_test = train_test_split(faces, labels, test_size=0.2, random_state=42)
+    # ✅ Train/Test Split (80% Train, 20% Test)
+    X_train, X_test, y_train, y_test = train_test_split(faces, labels, test_size=0.2, random_state=42)
 
-# ✅ Train FisherFace Model
-print("🔄 Training FisherFace model...")
-try:
-    recognizer = cv2.face.FisherFaceRecognizer_create()
-    recognizer.train(X_train, y_train)
+    # ✅ Train FisherFace Model
+    print("🔄 Training FisherFace model...")
+    try:
+        recognizer = cv2.face.FisherFaceRecognizer_create()
+        recognizer.train(X_train, y_train)
 
-    # ✅ Evaluate Model on Test Set
-    correct = 0
-    for i in range(len(X_test)):
-        predicted_label, confidence = recognizer.predict(X_test[i])
-        actual_label = y_test[i]
-        if predicted_label == actual_label:
-            correct += 1
-        print(f"Actual: {actual_label}, Predicted: {predicted_label}, Confidence: {confidence:.2f}")
+        # ✅ Evaluate Model on Test Set
+        correct = 0
+        for i in range(len(X_test)):
+            predicted_label, confidence = recognizer.predict(X_test[i])
+            actual_label = y_test[i]
+            if predicted_label == actual_label:
+                correct += 1
+            print(f"Actual: {actual_label}, Predicted: {predicted_label}, Confidence: {confidence:.2f}")
 
-    accuracy = (correct / len(X_test)) * 100
-    print(f"✅ Validation Accuracy: {accuracy:.2f}%")
+        accuracy = (correct / len(X_test)) * 100
+        print(f"✅ Validation Accuracy: {accuracy:.2f}%")
 
-    # ✅ Save Model & Label Map
-    recognizer.write(MODEL_PATH)
-    np.save(LABEL_MAP_PATH, label_map)
+        # ✅ Save Model & Label Map
+        recognizer.write(MODEL_PATH)
+        np.save(LABEL_MAP_PATH, label_map, allow_pickle=True)
 
-    # ✅ Verify model save
-    if os.path.exists(MODEL_PATH) and os.path.exists(LABEL_MAP_PATH):
-        print(f"✅ Model trained and saved at {MODEL_PATH}")
-        print(f"✅ Label map saved at {LABEL_MAP_PATH}")
-    else:
-        print("❌ Error saving model!")
+        # ✅ Verify model save
+        if os.path.exists(MODEL_PATH) and os.path.exists(LABEL_MAP_PATH):
+            print(f"✅ Model trained and saved at {MODEL_PATH}")
+            print(f"✅ Label map saved at {LABEL_MAP_PATH}")
+            return True
+        else:
+            print("❌ Error saving model!")
+            return False
 
-except cv2.error as e:
-    print(f"❌ Training error: {e}")
-    exit(1)
+    except cv2.error as e:
+        print(f"❌ Training error: {e}")
+        return False
+
+if __name__ == "__main__":
+    train_model()

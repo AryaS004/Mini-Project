@@ -3,16 +3,18 @@ import numpy as np
 import firebase_admin
 from firebase_admin import credentials, firestore
 from datetime import datetime
+from cv2 import dnn 
 
 # ✅ Initialize Firebase
-cred = credentials.Certificate("attendence-list-lbs-firebase-adminsdk-fbsvc-ae262f0826.json")  # 🔹 Replace with your actual Firebase config file
-firebase_admin.initialize_app(cred)
+if not firebase_admin._apps:
+    cred = credentials.Certificate("attendence-list-lbs-firebase-adminsdk-fbsvc-ae262f0826.json")
+    firebase_admin.initialize_app(cred)
 
 # Initialize Firestore database
 firestore_db = firestore.client()
 
 # ✅ Load Pretrained Face Detector (DNN)
-face_net = cv2.dnn.readNetFromCaffe("models/deploy.prototxt", "models/res10_300x300_ssd_iter_140000.caffemodel")
+face_net = dnn.readNetFromCaffe("models/deploy.prototxt", "models/res10_300x300_ssd_iter_140000.caffemodel")
 
 # ✅ Load FisherFace Model & Labels
 recognizer = cv2.face.FisherFaceRecognizer_create()
@@ -79,7 +81,7 @@ def mark_attendance(student_id, student_name, subject, teacher_email):
 
 # ✅ Start Face Recognition
 def start_recognition():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     print("📷 Starting Face Recognition...")
 
     while True:
